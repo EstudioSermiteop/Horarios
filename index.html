@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Horarios</title>
+<title>Níwer</title>
 
 <!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -109,9 +109,7 @@ button.secondary{background:#334155;color:white}
   font-size:18px;
 }
 
-.menuItem:hover{
-  background:#1e293b;
-}
+.menuItem:hover{ background:#1e293b; }
 
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
 th,td{border:1px solid #334155;padding:6px;text-align:center}
@@ -140,7 +138,7 @@ th{background:#334155}
   <button onclick="verGuardados()">📂 Horarios</button>
 </div>
 
-<header>📚 Horarios</header>
+<header>📚 Níwer</header>
 
 <div class="container">
 
@@ -166,6 +164,17 @@ th{background:#334155}
   <button onclick="crearHorario()">Crear horario</button>
 </div>
 
+<!-- 📚 BIBLIOTECA -->
+<div id="pantallaBiblioteca" class="card hidden">
+  <h2>📚 Biblioteca Níwer</h2>
+
+  <button onclick="alert('🚧 Próximamente subir historias')">
+    ✍️ Subir tu propia historia
+  </button>
+
+  <div id="listaLibros"></div>
+</div>
+
 <!-- TABLA -->
 <div id="pantallaHorario" class="card hidden">
   <button class="secondary" onclick="volverConfig()">⬅️ Regresar</button>
@@ -185,7 +194,7 @@ th{background:#334155}
 <script>
 // 🔥 Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBBODZcEB4yIm2-UjpjveBy2tr7RDT-hYo",
+  apiKey: "AIzaSy...",
   authDomain: "estudio-sermiteop.firebaseapp.com",
   databaseURL: "https://estudio-sermiteop-default-rtdb.firebaseio.com",
   projectId: "estudio-sermiteop",
@@ -199,7 +208,7 @@ const db = firebase.database();
 
 // 🔐 ADMIN
 let esAdmin = false;
-const LLAVE = "Eduardo61101";
+const LLAVE = "Eduardo61101 ";
 
 function pedirLlave(){
   const clave = prompt("Llave de admin");
@@ -213,20 +222,56 @@ function pedirLlave(){
   }
 }
 
-// navegación
+// ⭐ FUNCIÓN MAESTRA (LA QUE TE FALTABA)
 function mostrar(id){
-  ["pantallaInicio","pantallaConfig","pantallaHorario","pantallaGuardados"].forEach(x=>{
-    document.getElementById(x).classList.add("hidden");
+  [
+    "pantallaInicio",
+    "pantallaConfig",
+    "pantallaHorario",
+    "pantallaGuardados",
+    "pantallaBiblioteca"
+  ].forEach(x=>{
+    const el=document.getElementById(x);
+    if(el) el.classList.add("hidden");
   });
-  document.getElementById(id).classList.remove("hidden");
+
+  const destino=document.getElementById(id);
+  if(destino) destino.classList.remove("hidden");
 }
 
+// navegación
 function volverInicio(){ if(esAdmin) mostrar("pantallaInicio"); }
 function volverConfig(){ mostrar("pantallaConfig"); }
 
 function irCrear(){
   if(!esAdmin) return alert("🔒 Solo admin");
   mostrar("pantallaConfig");
+}
+
+// 📚 biblioteca
+function mostrarBiblioteca(){
+  mostrar("pantallaBiblioteca");
+  cargarLibrosDemo();
+}
+
+function cargarLibrosDemo(){
+  const cont=document.getElementById("listaLibros");
+  if(cont.dataset.cargado) return;
+
+  const libros=[
+    {titulo:"El misterio del aula",autor:"Usuario Níwer"},
+    {titulo:"Aventura en la ciudad",autor:"Comunidad"},
+    {titulo:"Mi primer cómic",autor:"Alumno"}
+  ];
+
+  libros.forEach(lib=>{
+    const div=document.createElement("div");
+    div.className="itemHorario";
+    div.innerHTML=`<b>${lib.titulo}</b><br><small>${lib.autor}</small>`;
+    cont.appendChild(div);
+  });
+
+  cont.dataset.cargado="1";
 }
 
 // crear tabla
@@ -248,7 +293,7 @@ function crearHorario(){
 
     for(let d=0;d<5;d++){
       const td=document.createElement("td");
-      td.contentEditable = true;
+      td.contentEditable=true;
       td.textContent="Materia";
       tr.appendChild(td);
     }
@@ -261,27 +306,22 @@ function crearHorario(){
 async function guardarHorario(){
   if(!esAdmin) return alert("🔒 Solo admin");
 
-  const nombre = prompt("Nombre del horario");
+  const nombre=prompt("Nombre del horario");
   if(!nombre) return;
 
   const tablaHTML=document.getElementById("tabla").innerHTML;
 
-  await db.ref("horarios").push({
-    nombre,
-    tabla: tablaHTML
-  });
-
+  await db.ref("horarios").push({nombre,tabla:tablaHTML});
   alert("Guardado ✅");
   verGuardados();
 }
 
 // ver horarios
 function verGuardados(){ mostrar("pantallaGuardados"); }
-
 function toggleTabla(el){ el.classList.toggle("hidden"); }
 
 // realtime
-db.ref("horarios").on("value", snap=>{
+db.ref("horarios").on("value",snap=>{
   const cont=document.getElementById("listaHorarios");
   cont.innerHTML="";
 
@@ -299,10 +339,7 @@ db.ref("horarios").on("value", snap=>{
     tablaWrap.className="tablaWrap hidden";
     tablaWrap.innerHTML=`<table>${data.tabla}</table>`;
 
-    tablaWrap.querySelectorAll("td").forEach(td=>{
-      td.contentEditable=false;
-    });
-
+    tablaWrap.querySelectorAll("td").forEach(td=>td.contentEditable=false);
     titulo.onclick=()=>toggleTabla(tablaWrap);
 
     wrap.appendChild(titulo);
@@ -332,7 +369,7 @@ function abrirSeccion(sec){
 
   if(sec==="horarios") verGuardados();
   if(sec==="ia") alert("🤖 Próximamente IA de tareas");
-  if(sec==="biblioteca") alert("📚 Próximamente biblioteca");
+  if(sec==="biblioteca") mostrarBiblioteca();
   if(sec==="vacaciones"){
     const hoy=new Date();
     const vac=new Date("2026-07-01");
