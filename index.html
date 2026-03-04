@@ -1,11 +1,19 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Horarios</title><!-- Firebase compat --><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><style>
+<title>Horarios</title>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
 *{box-sizing:border-box;font-family:system-ui,Arial}
 body{margin:0;background:#0f172a;color:white}
 
+/* TOP */
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -21,7 +29,13 @@ body{margin:0;background:#0f172a;color:white}
   border-radius:10px;
 }
 
-header{padding:10px;text-align:center;background:#111827;font-weight:bold}
+header{
+  padding:10px;
+  text-align:center;
+  background:#111827;
+  font-weight:bold;
+}
+
 .container{padding:14px;max-width:900px;margin:auto}
 
 button,select,input{
@@ -58,6 +72,47 @@ button.secondary{background:#334155;color:white}
   font-size:20px;
 }
 
+/* ☰ botón menú */
+.menuBtn{
+  position:fixed;
+  top:12px;
+  left:12px;
+  background:linear-gradient(135deg,#22c55e,#a855f7,#ec4899);
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  cursor:pointer;
+  z-index:20;
+}
+
+/* menú lateral */
+.sideMenu{
+  position:fixed;
+  top:0;
+  left:0;
+  width:240px;
+  height:100%;
+  background:#111827;
+  padding-top:70px;
+  z-index:15;
+  box-shadow:0 0 20px rgba(0,0,0,.6);
+}
+
+.menuItem{
+  padding:16px;
+  border-bottom:1px solid #334155;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.menuItem:hover{
+  background:#1e293b;
+}
+
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
 th,td{border:1px solid #334155;padding:6px;text-align:center}
 th{background:#334155}
@@ -65,14 +120,40 @@ th{background:#334155}
 @media (max-width:600px){
   table{font-size:10px}
 }
-</style></head>
-<body><div class="topbar">
+</style>
+</head>
+<body>
+
+<!-- ☰ -->
+<div class="menuBtn" onclick="toggleMenu()">☰</div>
+
+<!-- MENU -->
+<div id="sideMenu" class="sideMenu hidden">
+  <div class="menuItem" onclick="abrirSeccion('horarios')">📂 Horarios</div>
+  <div class="menuItem" onclick="abrirSeccion('ia')">🤖 IA tareas</div>
+  <div class="menuItem" onclick="abrirSeccion('biblioteca')">📚 Biblioteca</div>
+  <div class="menuItem" onclick="abrirSeccion('vacaciones')">🌴 ¿Cuánto falta?</div>
+</div>
+
+<div class="topbar">
   <button id="btnHome" class="hidden" onclick="volverInicio()">🏠 Home</button>
   <button onclick="verGuardados()">📂 Horarios</button>
-</div><header>📚 Horarios</header><div class="container"><!-- HOME --><div id="pantallaInicio" class="card hidden">
+</div>
+
+<header>📚 Horarios</header>
+
+<div class="container">
+
+<!-- HOME -->
+<div id="pantallaInicio" class="card hidden">
   <button onclick="irCrear()">➕ Crear horario escolar</button>
-</div><!-- CONFIG --><div id="pantallaConfig" class="card hidden">
-  <button class="secondary" onclick="volverInicio()">⬅️ Volver</button>  <div>
+</div>
+
+<!-- CONFIG -->
+<div id="pantallaConfig" class="card hidden">
+  <button class="secondary" onclick="volverInicio()">⬅️ Volver</button>
+
+  <div>
     Horas:
     <select id="numHoras">
       <option>5</option>
@@ -80,18 +161,29 @@ th{background:#334155}
       <option>7</option>
       <option>8</option>
     </select>
-  </div><button onclick="crearHorario()">Crear horario</button>
+  </div>
 
-</div><!-- TABLA --><div id="pantallaHorario" class="card hidden">
+  <button onclick="crearHorario()">Crear horario</button>
+</div>
+
+<!-- TABLA -->
+<div id="pantallaHorario" class="card hidden">
   <button class="secondary" onclick="volverConfig()">⬅️ Regresar</button>
   <button id="btnGuardar" onclick="guardarHorario()">💾 Guardar horario</button>
   <table id="tabla"></table>
-</div><!-- LISTA --><div id="pantallaGuardados" class="card">
+</div>
+
+<!-- LISTA -->
+<div id="pantallaGuardados" class="card">
   <div id="listaHorarios"></div>
-</div></div><button class="lockBtn" onclick="pedirLlave()">🔒</button>
+</div>
+
+</div>
+
+<button class="lockBtn" onclick="pedirLlave()">🔒</button>
 
 <script>
-// 🔥 TU CONFIG
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBBODZcEB4yIm2-UjpjveBy2tr7RDT-hYo",
   authDomain: "estudio-sermiteop.firebaseapp.com",
@@ -99,8 +191,7 @@ const firebaseConfig = {
   projectId: "estudio-sermiteop",
   storageBucket: "estudio-sermiteop.firebasestorage.app",
   messagingSenderId: "223030697007",
-  appId: "1:223030697007:web:fe4aa6b863b7ebf521bada",
-  measurementId: "G-NMD0ZC8ZX7"
+  appId: "1:223030697007:web:fe4aa6b863b7ebf521bada"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -122,7 +213,7 @@ function pedirLlave(){
   }
 }
 
-// ---------- NAVEGACIÓN ----------
+// navegación
 function mostrar(id){
   ["pantallaInicio","pantallaConfig","pantallaHorario","pantallaGuardados"].forEach(x=>{
     document.getElementById(x).classList.add("hidden");
@@ -130,48 +221,35 @@ function mostrar(id){
   document.getElementById(id).classList.remove("hidden");
 }
 
-function volverInicio(){
-  if(!esAdmin) return;
-  mostrar("pantallaInicio");
-}
-
-function volverConfig(){
-  mostrar("pantallaConfig");
-}
+function volverInicio(){ if(esAdmin) mostrar("pantallaInicio"); }
+function volverConfig(){ mostrar("pantallaConfig"); }
 
 function irCrear(){
-  if(!esAdmin){
-    alert("🔒 Solo admin");
-    return;
-  }
+  if(!esAdmin) return alert("🔒 Solo admin");
   mostrar("pantallaConfig");
 }
 
-// ---------- CREAR TABLA ----------
+// crear tabla
 function crearHorario(){
-  if(!esAdmin){
-    alert("🔒 Solo admin");
-    return;
-  }
+  if(!esAdmin) return alert("🔒 Solo admin");
 
   mostrar("pantallaHorario");
   const tabla=document.getElementById("tabla");
-  tabla.innerHTML="";
-
   tabla.innerHTML="<tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr>";
 
   const num=parseInt(document.getElementById("numHoras").value);
 
   for(let i=1;i<=num;i++){
     const tr=document.createElement("tr");
+
     const tdHora=document.createElement("td");
     tdHora.textContent="Bloque "+i;
     tr.appendChild(tdHora);
 
     for(let d=0;d<5;d++){
       const td=document.createElement("td");
-      td.contentEditable = esAdmin; // ✅ solo admin puede editar
-      td.textContent = "Materia";
+      td.contentEditable = true;
+      td.textContent="Materia";
       tr.appendChild(td);
     }
 
@@ -179,12 +257,9 @@ function crearHorario(){
   }
 }
 
-// ---------- GUARDAR ----------
+// guardar
 async function guardarHorario(){
-  if(!esAdmin){
-    alert("🔒 Solo admin");
-    return;
-  }
+  if(!esAdmin) return alert("🔒 Solo admin");
 
   const nombre = prompt("Nombre del horario");
   if(!nombre) return;
@@ -200,17 +275,13 @@ async function guardarHorario(){
   verGuardados();
 }
 
-// ---------- VER HORARIOS ----------
-function verGuardados(){
-  mostrar("pantallaGuardados");
-}
+// ver horarios
+function verGuardados(){ mostrar("pantallaGuardados"); }
 
-function toggleTabla(el){
-  el.classList.toggle("hidden");
-}
+function toggleTabla(el){ el.classList.toggle("hidden"); }
 
-// 🔄 TIEMPO REAL
-firebase.database().ref("horarios").on("value", snap=>{
+// realtime
+db.ref("horarios").on("value", snap=>{
   const cont=document.getElementById("listaHorarios");
   cont.innerHTML="";
 
@@ -228,9 +299,8 @@ firebase.database().ref("horarios").on("value", snap=>{
     tablaWrap.className="tablaWrap hidden";
     tablaWrap.innerHTML=`<table>${data.tabla}</table>`;
 
-    // ❌ asegurar que NADIE edite los guardados
     tablaWrap.querySelectorAll("td").forEach(td=>{
-      td.contentEditable = false;
+      td.contentEditable=false;
     });
 
     titulo.onclick=()=>toggleTabla(tablaWrap);
@@ -251,5 +321,25 @@ firebase.database().ref("horarios").on("value", snap=>{
     cont.appendChild(wrap);
   });
 });
-</script></body>
-</html>
+
+// menú
+function toggleMenu(){
+  document.getElementById("sideMenu").classList.toggle("hidden");
+}
+
+function abrirSeccion(sec){
+  toggleMenu();
+
+  if(sec==="horarios") verGuardados();
+  if(sec==="ia") alert("🤖 Próximamente IA de tareas");
+  if(sec==="biblioteca") alert("📚 Próximamente biblioteca");
+  if(sec==="vacaciones"){
+    const hoy=new Date();
+    const vac=new Date("2026-07-01");
+    const diff=Math.ceil((vac-hoy)/(1000*60*60*24));
+    alert("🌴 Faltan "+diff+" días");
+  }
+}
+</script>
+</body>
+  </html>
