@@ -11,7 +11,6 @@
 <style>
 *{box-sizing:border-box;font-family:system-ui,Arial}
 body{margin:0;background:#0f172a;color:white}
-
 .topbar{display:flex;justify-content:space-between;padding:10px;background:#020617;}
 .topbar button{background:#334155;color:white;padding:8px 12px;border:none;border-radius:10px;}
 header{padding:10px;text-align:center;background:#111827;font-weight:bold;}
@@ -125,7 +124,7 @@ th{background:#334155}
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
+  apiKey: "AIzaSyBBODZcEB4yIm2-UjpjveBy2tr7RDT-hYo",
   authDomain: "estudio-sermiteop.firebaseapp.com",
   databaseURL: "https://estudio-sermiteop-default-rtdb.firebaseio.com",
   projectId: "estudio-sermiteop",
@@ -137,7 +136,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let esAdmin=false;
-const LLAVE="Eduardo61101";
+const LLAVE="Eduardo61101 ";
 
 function pedirLlave(){
   const clave=prompt("Llave de admin");
@@ -187,6 +186,7 @@ function crearHorario(){
 }
 
 async function guardarHorario(){
+  if(!esAdmin) return alert("🔒 Solo admin");
   const nombre=prompt("Nombre del horario");
   if(!nombre) return;
   const tablaHTML=document.getElementById("tabla").innerHTML;
@@ -217,7 +217,7 @@ function enviarTarea(){
   const imgs=document.getElementById("tareaImagenes").files;
 
   if(!titulo||!autor||!desc) return alert("Completa todos los campos (incluyendo texto)");
-  
+
   let imgPromises = [];
   for(let i=0;i<imgs.length;i++){
     const reader = new FileReader();
@@ -276,6 +276,57 @@ function mostrarTareas(){
 function aceptarTarea(key){ db.ref("tareas/"+key).update({estado:"aceptada"}); }
 function rechazarTarea(key){ db.ref("tareas/"+key).remove(); }
 
+// Horarios guardados
+function cargarHorarios(){
+  const lista = document.getElementById("listaHorarios");
+  lista.innerHTML = "";
+  db.ref("horarios").on("value", snap => {
+    lista.innerHTML = "";
+    snap.forEach(child => {
+      const data = child.val();
+      const key = child.key;
+      const div = document.createElement("div");
+      div.className = "itemHorario";
+      div.style.cursor = "pointer";
+
+      div.innerHTML = `<b>${data.nombre}</b>
+        <br>
+        <button onclick="verHorario('${key}')">👁️ Ver</button>
+        <button onclick="borrarHorario('${key}')">🗑️ Borrar</button>`;
+
+      lista.appendChild(div);
+    });
+  });
+}
+
+// Ver horario en tabla editable
+function verHorario(key){
+  db.ref("horarios/"+key).once("value").then(snap=>{
+    const data = snap.val();
+    if(data && data.tabla){
+      document.getElementById("tabla").innerHTML = data.tabla;
+      mostrar("pantallaHorario");
+    }
+  });
+}
+
+// Borrar horario solo admin
+function borrarHorario(key){
+  if(!esAdmin){
+    alert("🔒 Solo el admin puede borrar horarios");
+    return;
+  }
+  if(confirm("¿Seguro quieres borrar este horario?")){
+    db.ref("horarios/"+key).remove();
+    alert("Horario eliminado ✅");
+  }
+}
+
+// Cargar horarios automáticamente al entrar
+window.onload = function(){
+  cargarHorarios();
+};
 </script>
+
 </body>
-</html>
+  </html>
