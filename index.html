@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Níwer - Tareas de Grupos</title>
+<title>Níwer - Escolar</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -29,6 +29,7 @@ button.secondary{background:#334155;color:white}
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
 th,td{border:1px solid #334155;padding:6px;text-align:center}
 th{background:#334155}
+img{max-width:100%;border-radius:10px;margin-top:6px}
 @media (max-width:600px){table{font-size:10px}}
 </style>
 </head>
@@ -38,17 +39,16 @@ th{background:#334155}
 
 <div id="sideMenu" class="sideMenu hidden">
   <div class="menuItem" onclick="abrirSeccion('horarios')">📂 Horarios</div>
-  <div class="menuItem" onclick="abrirSeccion('ia')">🤖 IA tareas</div>
   <div class="menuItem" onclick="abrirSeccion('tareas')">📚 Tareas de grupos</div>
-  <div class="menuItem" onclick="abrirSeccion('vacaciones')">🌴 ¿Cuánto falta para las vacaciones?</div>
+  <div class="menuItem" onclick="abrirSeccion('avisos')">📢 Avisos</div>
+  <div class="menuItem" onclick="abrirSeccion('juegos')">🎮 Juegos</div>
 </div>
 
 <div class="topbar">
   <button id="btnHome" class="hidden" onclick="volverInicio()">🏠 Home</button>
-  <button onclick="verGuardados()">📂 Horarios</button>
 </div>
 
-<header>📚 Níwer</header>
+<header>📚 Níwer - Escolar</header>
 
 <div class="container">
 
@@ -57,65 +57,66 @@ th{background:#334155}
   <button onclick="irCrear()">➕ Crear horario escolar</button>
 </div>
 
-<!-- CONFIG -->
+<!-- CONFIG HORARIO -->
 <div id="pantallaConfig" class="card hidden">
   <button class="secondary" onclick="volverInicio()">⬅️ Volver</button>
-  <div>
-    Horas:
+  <div>Horas:
     <select id="numHoras">
-      <option>5</option>
-      <option>6</option>
-      <option>7</option>
-      <option>8</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
     </select>
   </div>
   <button onclick="crearHorario()">Crear horario</button>
 </div>
 
-<!-- TABLA -->
+<!-- TABLA HORARIO -->
 <div id="pantallaHorario" class="card hidden">
   <button class="secondary" onclick="volverConfig()">⬅️ Regresar</button>
   <button id="btnGuardar" onclick="guardarHorario()">💾 Guardar horario</button>
   <table id="tabla"></table>
 </div>
 
-<!-- LISTA HORARIOS -->
+<!-- HORARIOS GUARDADOS -->
 <div id="pantallaGuardados" class="card">
+  <h3>📂 Horarios guardados</h3>
   <div id="listaHorarios"></div>
 </div>
 
-<!-- TAREAS DE GRUPOS -->
+<!-- TAREAS -->
 <div id="pantallaTareas" class="card hidden">
   <h2>📚 Tareas de Grupos</h2>
-
-  <button onclick="toggleFormularioTarea()">✍️ Subir tarea de tu grupo</button>
-
+  <button onclick="toggleFormularioTarea()">✍️ Subir tarea</button>
   <div id="formTarea" class="card hidden" style="margin-top:10px;">
     <h3>📝 Nueva Tarea</h3>
-
-    <label for="tareaTitulo">Título:</label><br>
-    <input id="tareaTitulo" placeholder="Escribe el título de tu tarea" style="width:100%; margin-bottom:6px;" /><br>
-
-    <label for="tareaAutor">Autor:</label><br>
-    <input id="tareaAutor" placeholder="Tu nombre o seudónimo" style="width:100%; margin-bottom:6px;" /><br>
-
-    <label for="tareaDescripcion">Texto o instrucciones:</label><br>
-    <textarea id="tareaDescripcion" placeholder="Escribe texto de la tarea, página del libro, etc." style="width:100%; margin-bottom:6px;"></textarea><br>
-
-    <label for="tareaGrado">Grado y grupo:</label><br>
-    <select id="tareaGrado" style="width:100%; margin-bottom:6px;">
-      <option>1A</option><option>1B</option><option>1C</option><option>1D</option><option>1E</option><option>1F</option>
-      <option>2A</option><option>2B</option><option>2C</option><option>2D</option><option>2E</option><option>2F</option>
-      <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
+    <label>Título:</label><br>
+    <input id="tareaTitulo" placeholder="Título" style="width:100%;margin-bottom:6px;"><br>
+    <label>Autor:</label><br>
+    <input id="tareaAutor" placeholder="Nombre o seudónimo" style="width:100%;margin-bottom:6px;"><br>
+    <label>Texto:</label><br>
+    <textarea id="tareaDescripcion" placeholder="Texto, página, libro..." style="width:100%;margin-bottom:6px;"></textarea><br>
+    <label>Grado:</label><br>
+    <select id="tareaGrado" style="width:100%;margin-bottom:6px;">
+      <option>1A</option><option>1B</option><option>1C</option>
+      <option>2A</option><option>2B</option><option>2C</option>
+      <option>3A</option><option>3B</option><option>3C</option>
     </select><br>
-
-    <label for="tareaImagenes">Imágenes (puedes subir varias):</label><br>
-    <input type="file" id="tareaImagenes" accept="image/*" multiple style="margin-bottom:6px;" /><br>
-
-    <button onclick="enviarTarea()">📤 Enviar al creador</button>
+    <label>Imágenes:</label><br>
+    <input type="file" id="tareaImagenes" accept="image/*" multiple style="margin-bottom:6px;"><br>
+    <button onclick="enviarTarea()">📤 Enviar</button>
   </div>
-
   <div id="listaTareas" style="margin-top:10px;"></div>
+</div>
+
+<!-- AVISOS -->
+<div id="pantallaAvisos" class="card hidden">
+  <h2>📢 Avisos del administrador</h2>
+  <div id="listaAvisos"></div>
+  <div id="formAviso" class="card hidden" style="margin-top:10px;">
+    <h3>➕ Nuevo aviso</h3>
+    <textarea id="textoAviso" placeholder="Escribe el aviso..." style="width:100%;margin-bottom:6px;"></textarea><br>
+    <input type="file" id="imagenAviso" accept="image/*" style="margin-bottom:6px;"><br>
+    <button onclick="publicarAviso()">📤 Publicar</button>
+  </div>
+  <button onclick="toggleFormularioAviso()">✍️ Crear aviso</button>
 </div>
 
 </div>
@@ -136,107 +137,71 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let esAdmin=false;
-const LLAVE="Eduardo61101 ";
+const LLAVE="Eduardo61101";
 
-function pedirLlave(){
-  const clave=prompt("Llave de admin");
-  if(clave===LLAVE){
-    esAdmin=true;
-    document.getElementById("btnHome").classList.remove("hidden");
-    mostrar("pantallaInicio");
-    alert("Modo admin activado ✅");
-  } else alert("Llave incorrecta");
-}
+function pedirLlave(){ const clave=prompt("Llave de admin"); if(clave===LLAVE){ esAdmin=true; document.getElementById("btnHome").classList.remove("hidden"); mostrar("pantallaInicio"); alert("Modo admin activado ✅"); } else alert("Llave incorrecta"); }
 
-function toggleFormularioTarea(){
-  document.getElementById("formTarea").classList.toggle("hidden");
-}
+function toggleFormularioTarea(){ document.getElementById("formTarea").classList.toggle("hidden"); }
+function toggleFormularioAviso(){ document.getElementById("formAviso").classList.toggle("hidden"); }
 
 function mostrar(id){
-  ["pantallaInicio","pantallaConfig","pantallaHorario","pantallaGuardados","pantallaTareas"].forEach(x=>{
-    const el=document.getElementById(x);
-    if(el) el.classList.add("hidden");
-  });
+  ["pantallaInicio","pantallaConfig","pantallaHorario","pantallaGuardados","pantallaTareas","pantallaAvisos"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
 function volverInicio(){ mostrar("pantallaInicio"); }
 function volverConfig(){ mostrar("pantallaConfig"); }
-function irCrear(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-  mostrar("pantallaConfig");
-}
-
-function crearHorario(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-  const tabla=document.getElementById("tabla");
-  tabla.innerHTML="<tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr>";
-  const num=parseInt(document.getElementById("numHoras").value);
-  for(let i=1;i<=num;i++){
-    const tr=document.createElement("tr");
-    const tdHora=document.createElement("td");
-    tdHora.textContent="Bloque "+i; tr.appendChild(tdHora);
-    for(let d=0;d<5;d++){
-      const td=document.createElement("td");
-      td.contentEditable=true; td.textContent="Materia"; tr.appendChild(td);
-    }
-    tabla.appendChild(tr);
-  }
-  mostrar("pantallaHorario");
-}
-
-async function guardarHorario(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-  const nombre=prompt("Nombre del horario");
-  if(!nombre) return;
-  const tablaHTML=document.getElementById("tabla").innerHTML;
-  await db.ref("horarios").push({nombre,tabla:tablaHTML});
-  alert("Guardado ✅");
-}
-
-function verGuardados(){ mostrar("pantallaGuardados"); }
+function irCrear(){ if(!esAdmin) return alert("🔒 Solo admin"); mostrar("pantallaConfig"); }
 
 function toggleMenu(){ document.getElementById("sideMenu").classList.toggle("hidden"); }
 function abrirSeccion(sec){
   toggleMenu();
   if(sec==="horarios") verGuardados();
-  if(sec==="ia") alert("🤖 Próximamente IA de tareas");
   if(sec==="tareas"){ mostrar("pantallaTareas"); mostrarTareas(); }
-  if(sec==="vacaciones"){
-    const hoy=new Date();
-    const vac=new Date("2026-07-01");
-    alert("🌴 Faltan "+Math.ceil((vac-hoy)/(1000*60*60*24))+" días");
-  }
+  if(sec==="avisos"){ mostrar("pantallaAvisos"); cargarAvisos(); }
+  if(sec==="juegos"){ window.location.href="juegos.html"; }
 }
 
+// --- HORARIOS ---
+function crearHorario(){ if(!esAdmin) return alert("🔒 Solo admin"); const tabla=document.getElementById("tabla"); tabla.innerHTML="<tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr>"; const num=parseInt(document.getElementById("numHoras").value); for(let i=1;i<=num;i++){ const tr=document.createElement("tr"); const tdHora=document.createElement("td"); tdHora.textContent="Bloque "+i; tr.appendChild(tdHora); for(let d=0;d<5;d++){ const td=document.createElement("td"); td.contentEditable=true; td.textContent="Materia"; tr.appendChild(td);} tabla.appendChild(tr);} mostrar("pantallaHorario"); }
+
+async function guardarHorario(){ if(!esAdmin) return alert("🔒 Solo admin"); const nombre=prompt("Nombre del horario"); if(!nombre) return; await db.ref("horarios").push({nombre,tabla:document.getElementById("tabla").innerHTML}); alert("Guardado ✅"); }
+
+function verGuardados(){
+  mostrar("pantallaGuardados");
+  const lista=document.getElementById("listaHorarios");
+  lista.innerHTML="";
+  db.ref("horarios").on("value", snap=>{
+    lista.innerHTML="";
+    snap.forEach(child=>{
+      const data=child.val(); const key=child.key;
+      const div=document.createElement("div"); div.className="itemHorario"; div.style.cursor="pointer";
+      div.innerHTML=`<b>${data.nombre}</b><br><button onclick="verHorario('${key}')">👁️ Ver</button><button onclick="borrarHorario('${key}')">🗑️ Borrar</button>`;
+      lista.appendChild(div);
+    });
+  });
+}
+
+function verHorario(key){ db.ref("horarios/"+key).once("value").then(snap=>{ const data=snap.val(); if(data && data.tabla){ document.getElementById("tabla").innerHTML=data.tabla; mostrar("pantallaHorario"); } }); }
+function borrarHorario(key){ if(!esAdmin){ alert("🔒 Solo el admin puede borrar horarios"); return;} if(confirm("¿Seguro quieres borrar este horario?")) db.ref("horarios/"+key).remove(); }
+
+window.onload=function(){ verGuardados(); }
+
+// --- TAREAS ---
 function enviarTarea(){
   const titulo=document.getElementById("tareaTitulo").value.trim();
   const autor=document.getElementById("tareaAutor").value.trim();
   const desc=document.getElementById("tareaDescripcion").value.trim();
   const grado=document.getElementById("tareaGrado").value;
   const imgs=document.getElementById("tareaImagenes").files;
-
-  if(!titulo||!autor||!desc) return alert("Completa todos los campos (incluyendo texto)");
-
-  let imgPromises = [];
+  if(!titulo||!autor||!desc) return alert("Completa todos los campos");
+  let imgPromises=[];
   for(let i=0;i<imgs.length;i++){
-    const reader = new FileReader();
-    const p = new Promise(resolve=>{
-      reader.onload=function(e){ resolve(e.target.result); };
-      reader.readAsDataURL(imgs[i]);
-    });
-    imgPromises.push(p);
+    const reader=new FileReader();
+    imgPromises.push(new Promise(resolve=>{ reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(imgs[i]); }));
   }
-
   Promise.all(imgPromises).then(imgDataArray=>{
-    db.ref("tareas").push({
-      titulo,
-      autor,
-      descripcion: desc,
-      grado,
-      imagenes: imgDataArray,
-      estado: "pendiente"
-    });
+    db.ref("tareas").push({titulo,autor,descripcion:desc,grado,imagenes:imgDataArray,estado:"pendiente"});
     alert("Tarea enviada ✅");
     toggleFormularioTarea();
     document.getElementById("tareaTitulo").value="";
@@ -247,86 +212,51 @@ function enviarTarea(){
 }
 
 function mostrarTareas(){
-  const cont=document.getElementById("listaTareas");
-  cont.innerHTML="";
-  db.ref("tareas").on("value", snap=>{
+  const cont=document.getElementById("listaTareas"); cont.innerHTML="";
+  db.ref("tareas").on("value", snap=>{ cont.innerHTML=""; snap.forEach(child=>{ const data=child.val(); const key=child.key; const div=document.createElement("div"); div.className="itemHorario"; if(esAdmin){ div.innerHTML=`<b>${data.titulo}</b><br><small>${data.autor}-${data.grado}</small><br>Estado:${data.estado}<br><button onclick="aceptarTarea('${key}')">✅</button><button onclick="rechazarTarea('${key}')">❌</button>`; } else if(data.estado==="aceptada"){ div.innerHTML=`<b>${data.titulo}</b><br><small>${data.autor}-${data.grado}</small><br>${data.descripcion}<br>${data.imagenes.map(img=>`<img src="${img}"><br>`).join('')}`; } cont.appendChild(div); }); });
+}
+function aceptarTarea(key){ db.ref("tareas/"+key).update({estado:"aceptada"}); }
+function rechazarTarea(key){ db.ref("tareas/"+key).remove(); }
+
+// --- AVISOS ---
+function publicarAviso(){
+  if(!esAdmin){ alert("Solo admin"); return; }
+  const texto=document.getElementById("textoAviso").value.trim();
+  const file=document.getElementById("imagenAviso").files[0];
+  if(!texto && !file) return alert("Escribe un texto o sube imagen");
+  if(file){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      db.ref("avisos").push({texto,imagen:e.target.result});
+      alert("Aviso publicado ✅");
+      toggleFormularioAviso();
+      document.getElementById("textoAviso").value="";
+      document.getElementById("imagenAviso").value="";
+      cargarAvisos();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    db.ref("avisos").push({texto,imagen:""});
+    alert("Aviso publicado ✅");
+    toggleFormularioAviso();
+    document.getElementById("textoAviso").value="";
+    cargarAvisos();
+  }
+}
+
+function cargarAvisos(){
+  const cont=document.getElementById("listaAvisos"); cont.innerHTML="";
+  db.ref("avisos").on("value", snap=>{
     cont.innerHTML="";
     snap.forEach(child=>{
       const data=child.val();
-      const key=child.key;
-      const div=document.createElement("div");
-      div.className="itemHorario";
-      if(esAdmin){
-        div.innerHTML=`<b>${data.titulo}</b><br>
-          <small>${data.autor} - ${data.grado}</small><br>
-          Estado: ${data.estado}<br>
-          <button onclick="aceptarTarea('${key}')">✅ Aceptar</button>
-          <button onclick="rechazarTarea('${key}')">❌ Rechazar</button>`;
-      } else if(data.estado==="aceptada"){
-        div.innerHTML=`<b>${data.titulo}</b><br>
-          <small>${data.autor} - ${data.grado}</small><br>
-          ${data.descripcion}<br>
-          ${data.imagenes.map(img=>`<img src="${img}" style="width:100%;max-width:200px;"><br>`).join('')}`;
-      }
+      const div=document.createElement("div"); div.className="itemHorario";
+      div.innerHTML=`${data.texto}<br>${data.imagen?`<img src="${data.imagen}">`:''}`;
       cont.appendChild(div);
     });
   });
 }
-
-function aceptarTarea(key){ db.ref("tareas/"+key).update({estado:"aceptada"}); }
-function rechazarTarea(key){ db.ref("tareas/"+key).remove(); }
-
-// Horarios guardados
-function cargarHorarios(){
-  const lista = document.getElementById("listaHorarios");
-  lista.innerHTML = "";
-  db.ref("horarios").on("value", snap => {
-    lista.innerHTML = "";
-    snap.forEach(child => {
-      const data = child.val();
-      const key = child.key;
-      const div = document.createElement("div");
-      div.className = "itemHorario";
-      div.style.cursor = "pointer";
-
-      div.innerHTML = `<b>${data.nombre}</b>
-        <br>
-        <button onclick="verHorario('${key}')">👁️ Ver</button>
-        <button onclick="borrarHorario('${key}')">🗑️ Borrar</button>`;
-
-      lista.appendChild(div);
-    });
-  });
-}
-
-// Ver horario en tabla editable
-function verHorario(key){
-  db.ref("horarios/"+key).once("value").then(snap=>{
-    const data = snap.val();
-    if(data && data.tabla){
-      document.getElementById("tabla").innerHTML = data.tabla;
-      mostrar("pantallaHorario");
-    }
-  });
-}
-
-// Borrar horario solo admin
-function borrarHorario(key){
-  if(!esAdmin){
-    alert("🔒 Solo el admin puede borrar horarios");
-    return;
-  }
-  if(confirm("¿Seguro quieres borrar este horario?")){
-    db.ref("horarios/"+key).remove();
-    alert("Horario eliminado ✅");
-  }
-}
-
-// Cargar horarios automáticamente al entrar
-window.onload = function(){
-  cargarHorarios();
-};
 </script>
 
 </body>
-  </html>
+</html>
