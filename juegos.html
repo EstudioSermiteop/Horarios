@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Juegos Níwer</title>
+
+<style>
+
+body{
+margin:0;
+background:#0f172a;
+color:white;
+font-family:system-ui;
+text-align:center;
+}
+
+header{
+padding:14px;
+background:#020617;
+font-size:20px;
+font-weight:bold;
+}
+
+.container{
+padding:15px;
+max-width:900px;
+margin:auto;
+}
+
+/* selector juegos */
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+margin-top:20px;
+}
+
+.gameBtn{
+background:#1e293b;
+padding:20px;
+border-radius:14px;
+font-size:18px;
+cursor:pointer;
+}
+
+.game{
+margin-top:20px;
+background:#020617;
+padding:15px;
+border-radius:14px;
+}
+
+.hidden{display:none}
+
+/* memoria */
+
+.memGrid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:8px;
+max-width:320px;
+margin:auto;
+}
+
+.memCard{
+background:#334155;
+padding:20px;
+border-radius:10px;
+font-size:22px;
+cursor:pointer;
+}
+
+/* mate */
+
+.opciones{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+max-width:300px;
+margin:auto;
+}
+
+.op{
+background:#22c55e;
+padding:14px;
+border-radius:10px;
+font-size:20px;
+color:black;
+font-weight:bold;
+cursor:pointer;
+}
+
+@media(max-width:600px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+}
+
+
+  /* Estilo para AMBOS botones (colores y forma) */
+button {
+  background-color: #90EE90;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Estilo que SOLO se aplica al botón que tiene class="subir" */
+.ir {
+  margin-top: 200px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>🎮 Juegos Níwer</header>
+
+<div class="container">
+
+<div class="grid">
+
+<div class="gameBtn" onclick="toggleJuego('memoria')">
+🧠 Memorizador
+</div>
+
+<div class="gameBtn" onclick="toggleJuego('mate')">
+🧮 Matemáticas
+</div>
+
+<div class="gameBtn" onclick="alert('🚧 Próximamente más juegos')">
+🎮 Próximamente más juegos
+</div>
+
+</div>
+
+
+<!-- MEMORIA -->
+
+<div id="memoria" class="game hidden">
+
+<h2>Memorizador</h2>
+
+<div id="nivelMem"></div>
+
+<div id="memGrid" class="memGrid"></div>
+
+</div>
+
+<!-- ir al index.html -->
+<!-- Le añadimos class="subir" solo al que quieres mover -->
+<button class="ir" onclick="window.location.href='index.html';">Ir a la pagina principal</button>
+
+
+<!-- MATEMATICAS -->
+
+<div id="mate" class="game hidden">
+
+<h2>Matemáticas</h2>
+
+<div id="tiempoMate">⏱ Tiempo: 100</div>
+
+<h3 id="preguntaMate"></h3>
+
+<div id="opcionesMate" class="opciones"></div>
+
+<button onclick="iniciarMate()">Reiniciar</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* abrir cerrar juegos */
+
+function toggleJuego(id){
+
+let el=document.getElementById(id)
+
+el.classList.toggle("hidden")
+
+}
+
+
+
+/* MEMORIA */
+
+let nivel=3
+let secuencia=[]
+let seleccion=[]
+
+function iniciarMemoria(){
+
+secuencia=[]
+
+for(let i=0;i<nivel;i++){
+
+secuencia.push(Math.floor(Math.random()*9)+1)
+
+}
+
+mostrarSecuencia()
+
+}
+
+function mostrarSecuencia(){
+
+const grid=document.getElementById("memGrid")
+grid.innerHTML=""
+
+document.getElementById("nivelMem").innerText="Nivel: "+nivel
+
+let visibles=[...secuencia]
+
+for(let i=0;i<visibles.length;i++){
+
+let div=document.createElement("div")
+
+div.className="memCard"
+div.innerText=visibles[i]
+
+grid.appendChild(div)
+
+}
+
+setTimeout(()=>{
+
+grid.innerHTML=""
+
+for(let i=0;i<secuencia.length;i++){
+
+let div=document.createElement("div")
+
+div.className="memCard"
+div.innerText="?"
+
+div.onclick=()=>seleccionar(i)
+
+grid.appendChild(div)
+
+}
+
+},1000)
+
+}
+
+function seleccionar(i){
+
+seleccion.push(secuencia[i])
+
+if(seleccion.length==secuencia.length){
+
+let correcto=true
+
+for(let x=0;x<secuencia.length;x++){
+
+if(secuencia[x]!=seleccion[x]) correcto=false
+
+}
+
+if(correcto){
+
+nivel++
+
+seleccion=[]
+
+setTimeout(iniciarMemoria,500)
+
+}else{
+
+alert("Incorrecto")
+
+seleccion=[]
+
+iniciarMemoria()
+
+}
+
+}
+
+}
+
+iniciarMemoria()
+
+
+
+/* MATEMATICAS */
+
+let tiempo=100
+let intervalo
+let pregunta
+let respuesta
+
+function iniciarMate(){
+
+tiempo=100
+
+generarPregunta()
+
+clearInterval(intervalo)
+
+intervalo=setInterval(()=>{
+
+tiempo--
+
+document.getElementById("tiempoMate").innerText="⏱ Tiempo: "+tiempo
+
+if(tiempo<=0){
+
+clearInterval(intervalo)
+
+alert("Tiempo terminado")
+
+}
+
+},1000)
+
+}
+
+function generarPregunta(){
+
+let a=Math.floor(Math.random()*20)+1
+let b=Math.floor(Math.random()*10)+1
+
+let ops=["+","-","×"]
+
+let op=ops[Math.floor(Math.random()*ops.length)]
+
+if(op=="+") respuesta=a+b
+if(op=="-") respuesta=a-b
+if(op=="×") respuesta=a*b
+
+pregunta=`${a} ${op} ${b} = ?`
+
+document.getElementById("preguntaMate").innerText=pregunta
+
+let opciones=[respuesta]
+
+while(opciones.length<4){
+
+let falsa=respuesta+Math.floor(Math.random()*10-5)
+
+if(!opciones.includes(falsa)) opciones.push(falsa)
+
+}
+
+opciones.sort(()=>Math.random()-0.5)
+
+let cont=document.getElementById("opcionesMate")
+
+cont.innerHTML=""
+
+opciones.forEach(op=>{
+
+let btn=document.createElement("div")
+
+btn.className="op"
+
+btn.innerText=op
+
+btn.onclick=function(){
+
+if(op==respuesta){
+
+tiempo+=30
+
+generarPregunta()
+
+}else{
+
+tiempo-=30
+
+alert("Incorrecto, intenta la misma")
+
+}
+
+}
+
+cont.appendChild(btn)
+
+})
+
+}
+
+iniciarMate()
+
+
+</script>
+
+</body>
+  </html>
