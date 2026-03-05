@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Níwer</title>
+<title>Níwer - Tareas de Grupos</title>
 
 <!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -38,7 +38,7 @@ header{
 
 .container{padding:14px;max-width:900px;margin:auto}
 
-button,select,input{
+button,select,input,textarea{
   padding:10px;
   border-radius:10px;
   border:none;
@@ -129,7 +129,7 @@ th{background:#334155}
 <div id="sideMenu" class="sideMenu hidden">
   <div class="menuItem" onclick="abrirSeccion('horarios')">📂 Horarios</div>
   <div class="menuItem" onclick="abrirSeccion('ia')">🤖 IA tareas</div>
-  <div class="menuItem" onclick="abrirSeccion('biblioteca')">📚 Biblioteca</div>
+  <div class="menuItem" onclick="abrirSeccion('tareas')">📚 Tareas de grupos</div>
   <div class="menuItem" onclick="abrirSeccion('vacaciones')">🌴 ¿Cuánto falta para las vacaciones?</div>
 </div>
 
@@ -150,7 +150,6 @@ th{background:#334155}
 <!-- CONFIG -->
 <div id="pantallaConfig" class="card hidden">
   <button class="secondary" onclick="volverInicio()">⬅️ Volver</button>
-
   <div>
     Horas:
     <select id="numHoras">
@@ -160,19 +159,7 @@ th{background:#334155}
       <option>8</option>
     </select>
   </div>
-
   <button onclick="crearHorario()">Crear horario</button>
-</div>
-
-<!-- 📚 BIBLIOTECA -->
-<div id="pantallaBiblioteca" class="card hidden">
-  <h2>📚 Biblioteca Níwer</h2>
-
-  <button onclick="alert('🚧 Próximamente subir historias')">
-    ✍️ Subir tu propia historia
-  </button>
-
-  <div id="listaLibros"></div>
 </div>
 
 <!-- TABLA -->
@@ -182,9 +169,43 @@ th{background:#334155}
   <table id="tabla"></table>
 </div>
 
-<!-- LISTA -->
+<!-- LISTA HORARIOS -->
 <div id="pantallaGuardados" class="card">
   <div id="listaHorarios"></div>
+</div>
+
+<!-- TAREAS DE GRUPOS -->
+<div id="pantallaTareas" class="card hidden">
+  <h2>📚 Tareas de Grupos</h2>
+
+  <button onclick="toggleFormularioTarea()">✍️ Subir tarea de tu grupo</button>
+
+  <div id="formTarea" class="card hidden" style="margin-top:10px;">
+    <h3>📝 Nueva Tarea</h3>
+
+    <label for="tareaTitulo">Título:</label><br>
+    <input id="tareaTitulo" placeholder="Escribe el título de tu tarea" style="width:100%; margin-bottom:6px;" /><br>
+
+    <label for="tareaAutor">Autor:</label><br>
+    <input id="tareaAutor" placeholder="Tu nombre o seudónimo" style="width:100%; margin-bottom:6px;" /><br>
+
+    <label for="tareaDescripcion">Descripción / Instrucciones:</label><br>
+    <textarea id="tareaDescripcion" placeholder="Descripción de la tarea" style="width:100%; margin-bottom:6px;"></textarea><br>
+
+    <label for="tareaGrado">Grado y grupo:</label><br>
+    <select id="tareaGrado" style="width:100%; margin-bottom:6px;">
+      <option>1A</option><option>1B</option><option>1C</option><option>1D</option><option>1E</option><option>1F</option>
+      <option>2A</option><option>2B</option><option>2C</option><option>2D</option><option>2E</option><option>2F</option>
+      <option>3A</option><option>3B</option><option>3C</option><option>3D</option><option>3E</option><option>3F</option>
+    </select><br>
+
+    <label for="tareaImagenes">Imágenes (puedes subir varias):</label><br>
+    <input type="file" id="tareaImagenes" accept="image/*" multiple style="margin-bottom:6px;" /><br>
+
+    <button onclick="enviarTarea()">📤 Enviar al creador para que lo acepte</button>
+  </div>
+
+  <div id="listaTareas" style="margin-top:10px;"></div>
 </div>
 
 </div>
@@ -192,7 +213,7 @@ th{background:#334155}
 <button class="lockBtn" onclick="pedirLlave()">🔒</button>
 
 <script>
-// 🔥 Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "estudio-sermiteop.firebaseapp.com",
@@ -206,9 +227,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 🔐 ADMIN
 let esAdmin = false;
-const LLAVE = "Eduardo61101 ";
+const LLAVE = "Eduardo61101";
 
 function pedirLlave(){
   const clave = prompt("Llave de admin");
@@ -222,161 +242,141 @@ function pedirLlave(){
   }
 }
 
-// ⭐ FUNCIÓN MAESTRA (LA QUE TE FALTABA)
+// Mostrar/ocultar formularios
+function toggleFormularioTarea(){
+  const form = document.getElementById("formTarea");
+  if(form) form.classList.toggle("hidden");
+}
+
+// Mostrar secciones
 function mostrar(id){
-  [
-    "pantallaInicio",
-    "pantallaConfig",
-    "pantallaHorario",
-    "pantallaGuardados",
-    "pantallaBiblioteca"
-  ].forEach(x=>{
+  ["pantallaInicio","pantallaConfig","pantallaHorario","pantallaGuardados","pantallaTareas"].forEach(x=>{
     const el=document.getElementById(x);
     if(el) el.classList.add("hidden");
   });
-
   const destino=document.getElementById(id);
   if(destino) destino.classList.remove("hidden");
 }
 
-// navegación
-function volverInicio(){ if(esAdmin) mostrar("pantallaInicio"); }
+function volverInicio(){ mostrar("pantallaInicio"); }
 function volverConfig(){ mostrar("pantallaConfig"); }
+function irCrear(){ mostrar("pantallaConfig"); }
 
-function irCrear(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-  mostrar("pantallaConfig");
-}
-
-// 📚 biblioteca
-function mostrarBiblioteca(){
-  mostrar("pantallaBiblioteca");
-  cargarLibrosDemo();
-}
-
-function cargarLibrosDemo(){
-  const cont=document.getElementById("listaLibros");
-  if(cont.dataset.cargado) return;
-
-  const libros=[
-    {titulo:"El misterio del aula",autor:"Usuario Níwer"},
-    {titulo:"Aventura en la ciudad",autor:"Comunidad"},
-    {titulo:"Mi primer cómic",autor:"Alumno"}
-  ];
-
-  libros.forEach(lib=>{
-    const div=document.createElement("div");
-    div.className="itemHorario";
-    div.innerHTML=`<b>${lib.titulo}</b><br><small>${lib.autor}</small>`;
-    cont.appendChild(div);
-  });
-
-  cont.dataset.cargado="1";
-}
-
-// crear tabla
+// Crear y guardar horarios
 function crearHorario(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-
-  mostrar("pantallaHorario");
   const tabla=document.getElementById("tabla");
   tabla.innerHTML="<tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr>";
-
   const num=parseInt(document.getElementById("numHoras").value);
-
   for(let i=1;i<=num;i++){
     const tr=document.createElement("tr");
-
     const tdHora=document.createElement("td");
-    tdHora.textContent="Bloque "+i;
-    tr.appendChild(tdHora);
-
+    tdHora.textContent="Bloque "+i; tr.appendChild(tdHora);
     for(let d=0;d<5;d++){
       const td=document.createElement("td");
-      td.contentEditable=true;
-      td.textContent="Materia";
-      tr.appendChild(td);
+      td.contentEditable=true; td.textContent="Materia"; tr.appendChild(td);
     }
-
     tabla.appendChild(tr);
   }
 }
 
-// guardar
 async function guardarHorario(){
-  if(!esAdmin) return alert("🔒 Solo admin");
-
   const nombre=prompt("Nombre del horario");
   if(!nombre) return;
-
   const tablaHTML=document.getElementById("tabla").innerHTML;
-
   await db.ref("horarios").push({nombre,tabla:tablaHTML});
   alert("Guardado ✅");
-  verGuardados();
 }
 
-// ver horarios
+// Ver horarios
 function verGuardados(){ mostrar("pantallaGuardados"); }
-function toggleTabla(el){ el.classList.toggle("hidden"); }
 
-// realtime
-db.ref("horarios").on("value",snap=>{
-  const cont=document.getElementById("listaHorarios");
-  cont.innerHTML="";
-
-  snap.forEach(child=>{
-    const data=child.val();
-    const key=child.key;
-
-    const wrap=document.createElement("div");
-    wrap.className="itemHorario";
-
-    const titulo=document.createElement("div");
-    titulo.innerHTML=`<b>${data.nombre}</b>`;
-
-    const tablaWrap=document.createElement("div");
-    tablaWrap.className="tablaWrap hidden";
-    tablaWrap.innerHTML=`<table>${data.tabla}</table>`;
-
-    tablaWrap.querySelectorAll("td").forEach(td=>td.contentEditable=false);
-    titulo.onclick=()=>toggleTabla(tablaWrap);
-
-    wrap.appendChild(titulo);
-    wrap.appendChild(tablaWrap);
-
-    if(esAdmin){
-      const btnDel=document.createElement("button");
-      btnDel.textContent="🗑️ Borrar";
-      btnDel.onclick=(e)=>{
-        e.stopPropagation();
-        db.ref("horarios/"+key).remove();
-      };
-      wrap.appendChild(btnDel);
-    }
-
-    cont.appendChild(wrap);
-  });
-});
-
-// menú
-function toggleMenu(){
-  document.getElementById("sideMenu").classList.toggle("hidden");
-}
-
+// Menú
+function toggleMenu(){ document.getElementById("sideMenu").classList.toggle("hidden"); }
 function abrirSeccion(sec){
   toggleMenu();
-
   if(sec==="horarios") verGuardados();
   if(sec==="ia") alert("🤖 Próximamente IA de tareas");
-  if(sec==="biblioteca") mostrarBiblioteca();
+  if(sec==="tareas"){ mostrar("pantallaTareas"); mostrarTareas(); }
   if(sec==="vacaciones"){
     const hoy=new Date();
     const vac=new Date("2026-07-01");
-    const diff=Math.ceil((vac-hoy)/(1000*60*60*24));
-    alert("🌴 Faltan "+diff+" días");
+    alert("🌴 Faltan "+Math.ceil((vac-hoy)/(1000*60*60*24))+" días");
   }
 }
+
+// Subir tarea
+function enviarTarea(){
+  const titulo=document.getElementById("tareaTitulo").value.trim();
+  const autor=document.getElementById("tareaAutor").value.trim();
+  const desc=document.getElementById("tareaDescripcion").value.trim();
+  const grado=document.getElementById("tareaGrado").value;
+  const imgs=document.getElementById("tareaImagenes").files;
+
+  if(!titulo||!autor||!desc||imgs.length===0) return alert("Completa todos los campos");
+
+  let imgPromises = [];
+  for(let i=0;i<imgs.length;i++){
+    const reader = new FileReader();
+    const p = new Promise(resolve=>{
+      reader.onload=function(e){ resolve(e.target.result); };
+      reader.readAsDataURL(imgs[i]);
+    });
+    imgPromises.push(p);
+  }
+
+  Promise.all(imgPromises).then(imgDataArray=>{
+    db.ref("tareas").push({
+      titulo,
+      autor,
+      descripcion: desc,
+      grado,
+      imagenes: imgDataArray,
+      estado: "pendiente"
+    });
+    alert("Tarea enviada ✅");
+    toggleFormularioTarea(); // oculta el formulario
+    document.getElementById("tareaTitulo").value="";
+    document.getElementById("tareaAutor").value="";
+    document.getElementById("tareaDescripcion").value="";
+    document.getElementById("tareaImagenes").value="";
+  });
+}
+
+// Mostrar tareas
+function mostrarTareas(){
+  const cont=document.getElementById("listaTareas");
+  if(!cont) return;
+  cont.innerHTML="";
+  db.ref("tareas").on("value", snap=>{
+    cont.innerHTML="";
+    snap.forEach(child=>{
+      const data=child.val();
+      const key=child.key;
+      const div=document.createElement("div");
+      div.className="itemHorario";
+
+      if(esAdmin){
+        div.innerHTML=`<b>${data.titulo}</b><br>
+          <small>${data.autor} - ${data.grado}</small><br>
+          Estado: ${data.estado}<br>
+          <button onclick="aceptarTarea('${key}')">✅ Aceptar</button>
+          <button onclick="rechazarTarea('${key}')">❌ Rechazar</button>`;
+      } else if(data.estado==="aceptada"){
+        div.innerHTML=`<b>${data.titulo}</b><br>
+          <small>${data.autor} - ${data.grado}</small><br>
+          ${data.imagenes.map(img=>`<img src="${img}" style="width:100%;max-width:200px;"><br>`).join('')}
+          ${data.descripcion}`;
+      } else return;
+
+      cont.appendChild(div);
+    });
+  });
+}
+
+// Admin: aceptar/rechazar
+function aceptarTarea(key){ db.ref("tareas/"+key).update({estado:"aceptada"}); }
+function rechazarTarea(key){ db.ref("tareas/"+key).remove(); } // se elimina automáticamente
+
 </script>
 </body>
   </html>
